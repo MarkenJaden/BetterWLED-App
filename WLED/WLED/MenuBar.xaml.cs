@@ -44,17 +44,17 @@ namespace WLED
             }
         }
 
-        void OnLogoTapped(object sender, ItemTappedEventArgs e)
+        void OnLogoTapped(object sender, EventArgs eventArgs)
         {
             Device.OpenUri(new Uri("https://github.com/Aircoookie/WLED"));
         }
 
-        protected virtual void OnLeftButtonTapped(object sender, ItemTappedEventArgs e)
+        protected virtual void OnLeftButtonTapped(object sender, EventArgs eventArgs)
         {
             EventHandler handler = LeftButtonTapped;
             if (handler != null)
             {
-                handler(this, e);
+                handler(this, eventArgs);
             } else
             {
                 //The default left button behavior is a back button (if the parent view doesn't attach a custom handler)
@@ -62,9 +62,9 @@ namespace WLED
             }
         }
 
-        protected virtual void OnRightButtonTapped(object sender, ItemTappedEventArgs e)
+        protected virtual void OnRightButtonTapped(object sender, EventArgs eventArgs)
         {
-            RightButtonTapped?.Invoke(this, e);
+            RightButtonTapped?.Invoke(this, eventArgs);
         }
     }
 }
