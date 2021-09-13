@@ -28,7 +28,7 @@ namespace WLED
             listview = new DeviceListViewPage();
             MainPage = listview;
             //MainPage.SetValue(NavigationPage.BarTextColorProperty, Color.White);
-            Application.Current.MainPage.SetValue(NavigationPage.BarBackgroundColorProperty, "#0000AA");
+            Current.MainPage.SetValue(NavigationPage.BarBackgroundColorProperty, "#0000AA");
 
             Connectivity.ConnectivityChanged += OnConnectivityChanged;
         }
@@ -39,15 +39,11 @@ namespace WLED
             if (NetUtility.IsConnectedToWledAP()) listview.OpenAPDeviceControlPage();
 
             // Load device list from Preferences
-            if (Preferences.ContainsKey("wleddevices"))
-            {
-                string devices = Preferences.Get("wleddevices", "");
-                if (!devices.Equals(""))
-                {
-                    ObservableCollection<WLEDDevice> fromPreferences = Serialization.Deserialize(devices);
-                    if (fromPreferences != null) listview.DeviceList = fromPreferences;
-                }
-            }
+            if (!Preferences.ContainsKey("wleddevices")) return;
+            string devices = Preferences.Get("wleddevices", "");
+            if (devices.Equals("")) return;
+            ObservableCollection<WLEDDevice> fromPreferences = Serialization.Deserialize(devices);
+            if (fromPreferences != null) listview.DeviceList = fromPreferences;
         }
 
         protected override void OnSleep()

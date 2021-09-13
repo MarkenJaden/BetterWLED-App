@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Tmds.MDns;
 
 namespace WLED
@@ -7,8 +6,8 @@ namespace WLED
     //Discover _http._tcp services via mDNS/Zeroconf and verify they are WLED devices by sending an API call
     class DeviceDiscovery
     {
-        private static DeviceDiscovery Instance;
-        private ServiceBrowser serviceBrowser;
+        private static DeviceDiscovery _instance;
+        private readonly ServiceBrowser serviceBrowser;
         public event EventHandler<DeviceCreatedEventArgs> ValidDeviceFound;
 
         private DeviceDiscovery()
@@ -44,8 +43,7 @@ namespace WLED
 
         public static DeviceDiscovery GetInstance()
         {
-            if (Instance == null) Instance = new DeviceDiscovery();
-            return Instance;
+            return _instance ?? (_instance = new DeviceDiscovery());
         }
 
         protected virtual void OnValidDeviceFound(DeviceCreatedEventArgs e)

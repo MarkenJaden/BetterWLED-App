@@ -27,7 +27,7 @@ namespace WLED
                 if (value == null || value.Length < 3) return; //More elaborate checking for URL syntax could be added here
                 networkAddress = value;
             }
-            get { return networkAddress; }
+            get => networkAddress;
         }
 
         [XmlElement("name")]
@@ -39,7 +39,7 @@ namespace WLED
                 name = value;
                 OnPropertyChanged("Name");
             }
-            get { return name; }
+            get => name;
         }
 
         internal DeviceStatus CurrentStatus
@@ -49,7 +49,7 @@ namespace WLED
                 status = value;
                 OnPropertyChanged("Status");
             }
-            get { return status; }
+            get => status;
         }
 
         [XmlElement("ncustom")]
@@ -66,7 +66,7 @@ namespace WLED
                 OnPropertyChanged("TextColor");
                 OnPropertyChanged("IsEnabled");
             }
-            get { return isEnabled; }
+            get => isEnabled;
         }
 
         [XmlIgnore]
@@ -75,13 +75,11 @@ namespace WLED
             set
             {
                 brightnessCurrent = value;
-                if (brightnessCurrent != brightnessReceived) //only send if value was changed by slider
-                {
-                    byte toSend = (byte)Math.Round(brightnessCurrent);
-                    RateLimitedSender.SendAPICall(this, "A=" + toSend);
-                }
+                if (brightnessCurrent == brightnessReceived) return;
+                byte toSend = (byte)Math.Round(brightnessCurrent);
+                RateLimitedSender.SendAPICall(this, "A=" + toSend);
             }
-            get { return brightnessCurrent; }
+            get => brightnessCurrent;
         }
 
         [XmlIgnore]
@@ -90,7 +88,7 @@ namespace WLED
         [XmlIgnore]
         public bool StateCurrent
         {
-            get { return stateCurrent; }
+            get => stateCurrent;
             set { OnPropertyChanged("StateColor"); stateCurrent = value; }
         }
 
@@ -98,13 +96,13 @@ namespace WLED
 
         //helper properties for updating view dynamically via data binding
         [XmlIgnore]
-        public Color StateColor { get { return StateCurrent ? Color.FromHex("#666") : Color.FromHex("#222"); } } //button background color
+        public Color StateColor => StateCurrent ? Color.FromHex("#666") : Color.FromHex("#222"); //button background color
 
         [XmlIgnore]
-        public string ListHeight { get { return isEnabled ? "-1" : "0"; } } //height of one view cell (set to 0 to hide device)
+        public string ListHeight => isEnabled ? "-1" : "0"; //height of one view cell (set to 0 to hide device)
 
         [XmlIgnore]
-        public string TextColor { get { return isEnabled ? "#FFF" : "#999"; } } //text color for modification page
+        public string TextColor => isEnabled ? "#FFF" : "#999"; //text color for modification page
 
         [XmlIgnore]
         public string Status //string containing IP and current status, second label in list viewcell
@@ -119,13 +117,15 @@ namespace WLED
                         case DeviceStatus.Default: statusText = ""; break;
                         case DeviceStatus.Unreachable: statusText = " (Offline)"; break;
                         case DeviceStatus.Error: statusText = " (Error)"; break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
                 }
                 else
                 {
                     statusText = " (Hidden)";
                 }
-                return string.Format("{0}{1}", networkAddress, statusText);
+                return $"{networkAddress}{statusText}";
             }
         }
 
@@ -151,16 +151,15 @@ namespace WLED
             }
 
             string response = await DeviceHttpConnection.GetInstance().Send_WLED_API_Call(url, call);
-            if (response == null)
+            switch (response)
             {
-                CurrentStatus = DeviceStatus.Unreachable;
-                return false;
-            }
-
-            if (response.Equals("err")) //404 or other non-success http status codes, indicates that target is not a WLED device
-            {
-                CurrentStatus = DeviceStatus.Error;
-                return false;
+                case null:
+                    CurrentStatus = DeviceStatus.Unreachable;
+                    return false;
+                //404 or other non-success http status codes, indicates that target is not a WLED device
+                case "err":
+                    CurrentStatus = DeviceStatus.Error;
+                    return false;
             }
 
             XmlApiResponse deviceResponse = XmlApiResponseParser.ParseApiResponse(response);
@@ -199,9 +198,8 @@ namespace WLED
         {
             WLEDDevice c = comp as WLEDDevice;
             if (c == null || c.Name == null) return 1;
-            int result = (name.CompareTo(c.name));
-            if (result != 0) return result;
-            return (networkAddress.CompareTo(c.networkAddress));
+            int result = (string.Compare(name, c.name, StringComparison.Ordinal));
+            return result != 0 ? result : string.Compare(networkAddress, c.networkAddress, StringComparison.Ordinal);
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Linq;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
-using System.Text;
 
 namespace WLED
 {
@@ -31,27 +28,10 @@ namespace WLED
             }
             return false;*/
 
-            foreach (var netInterface in NetworkInterface.GetAllNetworkInterfaces())
+            foreach (string ips in NetworkInterface.GetAllNetworkInterfaces().Where(netInterface => netInterface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || netInterface.NetworkInterfaceType == NetworkInterfaceType.Ethernet).SelectMany(netInterface => from addrInfo in netInterface.GetIPProperties().UnicastAddresses where addrInfo.Address.AddressFamily == AddressFamily.InterNetwork select addrInfo.Address into ip select ip.ToString() into ips where ips.StartsWith("192.168.4.") select ips))
             {
-                if (netInterface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 ||
-                    netInterface.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                {
-                    foreach (var addrInfo in netInterface.GetIPProperties().UnicastAddresses)
-                    {
-                        if (addrInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                        {
-                            var ip = addrInfo.Address;
-                            string ips = ip.ToString();
-
-                            if (ips.StartsWith("192.168.4."))
-                            {
-                                int dev = 0;
-                                if (!Int32.TryParse(ips.Substring(10), out dev)) { dev = 0; }
-                                if (dev > 1 && dev < 6) return true;
-                            }
-                        }
-                    }
-                }
+                if (!int.TryParse(ips.Substring(10), out var dev)) { dev = 0; }
+                if (dev > 1 && dev < 6) return true;
             }
 
             return false;

@@ -1,26 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace WLED
 {
     //Viewmodel: Page for hiding and deleting existing device list entries
-	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class DeviceModificationListViewPage : ContentPage
-	{
-        private ObservableCollection<WLEDDevice> DeviceList;
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class DeviceModificationListViewPage : ContentPage
+    {
+        private readonly ObservableCollection<WLEDDevice> deviceList;
         public DeviceModificationListViewPage (ObservableCollection<WLEDDevice> items)
-		{
-			InitializeComponent ();
+        {
+            InitializeComponent();
 
-            DeviceList = items;
-            DeviceModificationListView.ItemsSource = DeviceList;
+            deviceList = items;
+            DeviceModificationListView.ItemsSource = deviceList;
         }
 
         private void OnDeleteButtonTapped(object sender, EventArgs eventArgs)
@@ -28,10 +23,10 @@ namespace WLED
             Button s = sender as Button;
             if (!(s.Parent.BindingContext is WLEDDevice targetDevice)) return;
 
-            DeviceList.Remove(targetDevice);
+            deviceList.Remove(targetDevice);
 
             //Go back to main device list view if no devices in list
-            if (DeviceList.Count == 0) Navigation.PopModalAsync(false);
+            if (deviceList.Count == 0) Navigation.PopModalAsync(false);
         }
 
         private void OnDeviceTapped(object sender, ItemTappedEventArgs e)

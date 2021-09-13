@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -33,6 +28,10 @@ namespace WLED
                 case ButtonIcon.Add: path = "icon_add.png"; break;
                 case ButtonIcon.Delete: path = "icon_bin.png"; break;
                 case ButtonIcon.Done: path = "icon_check.png"; break;
+                case ButtonIcon.None:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(ico), ico, null);
             }
 
             if (loc == ButtonLocation.Left)
@@ -44,6 +43,7 @@ namespace WLED
             }
         }
 
+        [Obsolete]
         void OnLogoTapped(object sender, EventArgs eventArgs)
         {
             Device.OpenUri(new Uri("https://github.com/Aircoookie/WLED"));

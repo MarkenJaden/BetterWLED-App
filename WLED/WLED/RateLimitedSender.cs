@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace WLED
@@ -38,12 +35,10 @@ namespace WLED
         private static void OnWaitPeriodOver(Object sender, ElapsedEventArgs e)
         {
             timer.Stop();
-            if (!alreadySent)
-            {
-                target?.SendAPICall(toSend);
-                alreadySent = true;
-                timer.Start();
-            }
+            if (alreadySent) return;
+            target?.SendAPICall(toSend);
+            alreadySent = true;
+            timer.Start();
         }
     }
 }

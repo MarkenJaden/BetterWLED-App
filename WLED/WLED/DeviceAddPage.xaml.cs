@@ -5,16 +5,16 @@ using Xamarin.Forms.Xaml;
 namespace WLED
 {
     //Viewmodel: Page for adding new lights
-	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class DeviceAddPage : ContentPage
-	{
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class DeviceAddPage : ContentPage
+    {
         public event EventHandler<DeviceCreatedEventArgs> DeviceCreated;
-        private bool discoveryMode = false;
-        private int devicesFoundCount = 0;
+        private bool discoveryMode;
+        private int devicesFoundCount;
 
-		public DeviceAddPage(DeviceListViewPage list)
-		{
-			InitializeComponent ();
+        public DeviceAddPage(DeviceListViewPage list)
+        {
+            InitializeComponent();
 
             topMenuBar.SetButtonIcon(ButtonLocation.Right, ButtonIcon.Done);
             topMenuBar.RightButtonTapped += OnEntryCompleted;
@@ -32,10 +32,10 @@ namespace WLED
             string address = networkAddressEntry.Text;
             string name = nameEntry.Text;
 
-            if (address == null || address.Length == 0) address = "192.168.4.1";
+            if (string.IsNullOrEmpty(address)) address = "192.168.4.1";
             if (address.StartsWith("http://")) address = address.Substring(7);
             if (address.EndsWith("/")) address = address.Substring(0, address.Length -1);
-            if (name == null || name.Length == 0)
+            if (string.IsNullOrEmpty(name))
             {
                 name = "(New Light)";
                 device.NameIsCustom = false;
@@ -84,12 +84,10 @@ namespace WLED
             //this method only gets called by mDNS search, display found devices
             devicesFoundCount++;
             if (devicesFoundCount == 1)
-            {
                 discoveryResultLabel.Text = "Found " + e.CreatedDevice.Name + "!";
-            } else
-            {
-                discoveryResultLabel.Text = "Found " + e.CreatedDevice.Name + " and " + (devicesFoundCount - 1) + " other lights!";
-            }
+            else
+                discoveryResultLabel.Text = "Found " + e.CreatedDevice.Name + " and " + (devicesFoundCount - 1) +
+                                            " other lights!";
 
             OnDeviceCreated(e);
         }
@@ -97,12 +95,10 @@ namespace WLED
         protected override void OnDisappearing()
         {
             //stop discovery if running
-            if (discoveryMode)
-            {
-                var discovery = DeviceDiscovery.GetInstance();
-                discovery.StopDiscovery();
-                discovery.ValidDeviceFound -= OnDeviceCreated;
-            }
+            if (!discoveryMode) return;
+            var discovery = DeviceDiscovery.GetInstance();
+            discovery.StopDiscovery();
+            discovery.ValidDeviceFound -= OnDeviceCreated;
         }
     }
 

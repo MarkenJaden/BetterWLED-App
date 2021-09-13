@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace WLED
@@ -10,31 +8,30 @@ namespace WLED
     {
         private static DeviceHttpConnection Instance;
 
-        private HttpClient Client;
+        private readonly HttpClient client;
 
         private DeviceHttpConnection ()
         {
-            Client = new HttpClient();
-            Client.Timeout = TimeSpan.FromSeconds(5);
+            client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(5);
         }
         
         public static DeviceHttpConnection GetInstance()
         {
-            if (Instance == null) Instance = new DeviceHttpConnection();
-            return Instance;
+            return Instance ?? (Instance = new DeviceHttpConnection());
         }
 
-        public async Task<string> Send_WLED_API_Call(string DeviceURI, string API_Call)
+        public async Task<string> Send_WLED_API_Call(string deviceUri, string apiCall)
         {
             try
             {
                 string apiCommand = "/win"; //WLED http API URI
-                if (API_Call != null && API_Call.Length > 0)
+                if (!string.IsNullOrEmpty(apiCall))
                 {
                     apiCommand += "&";
-                    apiCommand += API_Call;
+                    apiCommand += apiCall;
                 }
-                var result = await Client.GetAsync(DeviceURI + apiCommand);
+                var result = await client.GetAsync(deviceUri + apiCommand);
                 if (result.IsSuccessStatusCode)
                 {
                     return await result.Content.ReadAsStringAsync();

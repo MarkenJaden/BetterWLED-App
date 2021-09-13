@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using Xamarin.Forms;
 
 namespace WLED
@@ -15,17 +12,14 @@ namespace WLED
             try
             {
                 XElement xe = XElement.Parse(xml);
-                if (xe == null) return null;
-                resp.Name = xe.Element("ds")?.Value;
-                if (resp.Name == null) resp.Name = xe.Element("desc")?.Value; //try legacy XML element name (pre WLED 0.6.0)
+                resp.Name = xe.Element("ds")?.Value ?? xe.Element("desc")?.Value;
                 if (resp.Name == null) return null; //if we return at this point, parsing was unsuccessful (server likely not WLED device)
 
-                string bri_s = xe.Element("ac")?.Value;
-                if (bri_s == null) bri_s = xe.Element("act")?.Value; //try legacy XML element name (pre WLED 0.6.0)
+                string bri_s = xe.Element("ac")?.Value ?? xe.Element("act")?.Value;
                 if (bri_s != null)
                 {
                     int bri = 0;
-                    Int32.TryParse(bri_s, out bri);
+                    int.TryParse(bri_s, out bri);
                     resp.Brightness = (byte)bri;
                     resp.IsOn = (bri > 0); //light is on if brightness > 0
                 }
@@ -35,7 +29,7 @@ namespace WLED
                 foreach (var el in xe.Elements("cl"))
                 {
                     int co = 0;
-                    Int32.TryParse(el?.Value, out co);
+                    int.TryParse(el?.Value, out co);
                     switch (counter)
                     {
                         case 0: r = co / 255.0; break;

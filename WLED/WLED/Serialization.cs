@@ -17,9 +17,11 @@ namespace WLED
         {
             XmlSerializer xmlSerializer = new XmlSerializer(toSerialize.GetType());
 
-            XmlWriterSettings ws = new XmlWriterSettings();
-            ws.NewLineHandling = NewLineHandling.None;
-            ws.Indent = false;
+            XmlWriterSettings ws = new XmlWriterSettings
+            {
+                NewLineHandling = NewLineHandling.None,
+                Indent = false
+            };
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder, ws))
             {
@@ -41,7 +43,7 @@ namespace WLED
                 }
             }
             catch
-            {     
+            {
                 return null;
             }
         }

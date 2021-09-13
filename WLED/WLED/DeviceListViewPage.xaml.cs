@@ -2,8 +2,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -26,7 +24,7 @@ namespace WLED
                 RefreshAll();
                 UpdateElementsVisibility();
             }
-            get { return deviceList; }
+            get => deviceList;
         }
 
 
@@ -68,29 +66,21 @@ namespace WLED
         {
             WLEDDevice toAdd = e.CreatedDevice;
 
-            if (toAdd != null)
+            if (toAdd == null) return;
+            foreach (var d in deviceList.Where(d => toAdd.NetworkAddress.Equals(d.NetworkAddress)))
             {
-                foreach (WLEDDevice d in deviceList)
-                {
-                    //ensure there is only one device entry per IP
-                    if (toAdd.NetworkAddress.Equals(d.NetworkAddress))
-                    {
-                        if (toAdd.NameIsCustom)
-                        {
-                            d.Name = toAdd.Name;
-                            d.NameIsCustom = true;
-                            ReinsertDeviceSorted(d);
-                        }
-                        return;
-                    }
-                }
-                InsertDeviceSorted(toAdd);
-
-                toAdd.PropertyChanged += DevicePropertyChanged;
-                if (e.RefreshRequired) _ = toAdd.Refresh();
-
-                UpdateElementsVisibility();
+                if (!toAdd.NameIsCustom) return;
+                d.Name = toAdd.Name;
+                d.NameIsCustom = true;
+                ReinsertDeviceSorted(d);
+                return;
             }
+            InsertDeviceSorted(toAdd);
+
+            toAdd.PropertyChanged += DevicePropertyChanged;
+            if (e.RefreshRequired) _ = toAdd.Refresh();
+
+            UpdateElementsVisibility();
         }
 
         //Re-Insert device in list if its name changed to maintain alphabetical sorting
@@ -159,12 +149,10 @@ namespace WLED
             topMenuBar.SetButtonIcon(ButtonLocation.Left, listIsEmpty ? ButtonIcon.None : ButtonIcon.Delete);
 
             //iOS workaround for listview not updating unless ItemSource is modified
-            if (Device.RuntimePlatform == Device.iOS)
-            {
-                WLEDDevice dummy = new WLEDDevice();
-                deviceList.Add(dummy);
-                deviceList.Remove(dummy);
-            }
+            if (Device.RuntimePlatform != Device.iOS) return;
+            WLEDDevice dummy = new WLEDDevice();
+            deviceList.Add(dummy);
+            deviceList.Remove(dummy);
 
         }
 
